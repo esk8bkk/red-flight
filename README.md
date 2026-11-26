@@ -7,3 +7,4 @@
 ลิงก์สำหรับเพื่อน: https://esk8bkk.github.io/red-flight/
 
 ชูมือถือ (คำของแต่ละคน): https://esk8bkk.github.io/red-flight/phone.html
+คาราโอเกะ: https://esk8bkk.github.io/red-flight/karaoke.html
