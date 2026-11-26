@@ -37,8 +37,8 @@ body{background:radial-gradient(ellipse at 50% 120%,#ff5a1f 0%,#c10d22 35%,#6E04
  text-shadow:0 6px 0 rgba(0,0,0,.28),0 0 40px rgba(255,194,61,.45)}
 #card .who{position:absolute;bottom:calc(env(safe-area-inset-bottom) + 14px);left:0;right:0;text-align:center;font-size:18px;opacity:.9}
 #card .back{position:absolute;top:calc(env(safe-area-inset-top) + 8px);left:10px;font:inherit;font-size:15px;color:#fff;background:rgba(0,0,0,.28);
- border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:6px 14px;opacity:0;transition:opacity .2s;pointer-events:none}
-#card.ui .back{opacity:1;pointer-events:auto}
+ border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:8px 16px;opacity:.6;transition:opacity .2s;z-index:2}
+#card.ui .back{opacity:1}
 #card .tip{position:absolute;bottom:calc(env(safe-area-inset-bottom) + 46px);left:0;right:0;text-align:center;font-size:14px;opacity:0;transition:opacity .2s}
 #card.ui .tip{opacity:.75}
 </style>
@@ -54,7 +54,7 @@ body{background:radial-gradient(ellipse at 50% 120%,#ff5a1f 0%,#c10d22 35%,#6E04
   <button class="back" id="back">‹ เปลี่ยนชื่อ</button>
   <div class="top" id="top"></div>
   <div class="word" id="word"></div>
-  <div class="tip">แตะจอ = ซ่อน/แสดงปุ่ม · หมุนแนวนอนตัวจะใหญ่ขึ้น</div>
+  <div class="tip">หมุนแนวนอน ตัวจะใหญ่ขึ้น</div>
   <div class="who" id="who"></div>
 </div>
 <script>
@@ -88,14 +88,15 @@ async function wake(){try{if("wakeLock" in navigator&&!lock){lock=await navigato
 function open(i){cur=i;const p=P[i];card.style.background=grad(p[3]);
   document.getElementById("top").textContent=`SEAT ${p[0]} · RED🔥`;word.textContent=p[2];
   document.getElementById("who").textContent=p[1];card.classList.add("show");card.classList.remove("ui");
-  document.getElementById("pick").style.display="none";history.replaceState(null,"","#"+p[0]);fit();wake();}
-function close(){cur=-1;card.classList.remove("show");document.getElementById("pick").style.display="";history.replaceState(null,"",location.pathname);}
+  document.getElementById("pick").style.display="none";if(location.hash!=="#"+p[0])history.pushState(null,"","#"+p[0]);fit();wake();}
+function close(){cur=-1;card.classList.remove("show");document.getElementById("pick").style.display="";if(location.hash)history.pushState(null,"",location.pathname);}
 document.getElementById("list").addEventListener("click",e=>{const b=e.target.closest("button");if(b)open(+b.dataset.i);});
 card.addEventListener("click",e=>{if(e.target.id==="back"){close();return;}card.classList.toggle("ui");});
 addEventListener("resize",fit);addEventListener("orientationchange",()=>setTimeout(fit,250));
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&cur>=0)wake();});
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fit);
-const h=location.hash.slice(1),k=P.findIndex(p=>p[0]===h.padStart(2,"0"));if(h&&k>=0)open(k);
+function fromHash(){const h=location.hash.slice(1),k=P.findIndex(p=>p[0]===h.padStart(2,"0"));if(h&&k>=0)open(k);else if(cur>=0)close();}
+addEventListener("hashchange",fromHash);addEventListener("popstate",fromHash);addEventListener("pageshow",e=>{if(e.persisted)fromHash();});fromHash();
 </script>
 </body>
 </html>
