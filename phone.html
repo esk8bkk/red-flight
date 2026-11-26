@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#6E0410">
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="favicon.png">
+<title>ชูมือถือ · Red🔥</title>
+<style>
+@font-face{font-family:'Kanit';font-weight:700;font-style:normal;font-display:swap;src:url(kanit-700.woff2) format('woff2');}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:#3a0209;color:#fff;font-family:"Kanit","Thonburi","Noto Sans Thai",system-ui,sans-serif;
+ -webkit-user-select:none;user-select:none;-webkit-text-size-adjust:100%}
+body{background:radial-gradient(ellipse at 50% 120%,#ff5a1f 0%,#c10d22 35%,#6E0410 75%,#3a0209 100%) fixed}
+/* picker */
+#pick{min-height:100%;padding:calc(env(safe-area-inset-top) + 22px) 16px calc(env(safe-area-inset-bottom) + 24px)}
+#pick h1{font-size:28px;font-weight:700;text-align:center;line-height:1.2}
+#pick p{text-align:center;opacity:.85;font-size:16px;margin:6px 0 18px;line-height:1.4}
+#list{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:560px;margin:0 auto}
+#list button{font:inherit;color:#fff;border:0;border-radius:16px;padding:12px 12px 11px;text-align:left;min-height:76px;
+ display:flex;flex-direction:column;justify-content:space-between;gap:4px;box-shadow:0 6px 16px rgba(0,0,0,.3);cursor:pointer;
+ transition:transform .12s ease}
+#list button:active{transform:scale(.97)}
+#list .seat{font-size:13px;opacity:.85;letter-spacing:1px}
+#list .nm{font-size:18px;font-weight:700;line-height:1.15;word-break:break-word}
+#list .wd{font-size:14px;opacity:.9}
+#line{max-width:560px;margin:20px auto 0;text-align:center;font-size:17px;line-height:1.5;color:#FFE08A;font-weight:700}
+/* card */
+#card{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;
+ padding:calc(env(safe-area-inset-top) + 10px) 4vw calc(env(safe-area-inset-bottom) + 10px)}
+#card.show{display:flex}
+#card .top{position:absolute;top:calc(env(safe-area-inset-top) + 12px);left:0;right:0;text-align:center;font-size:16px;letter-spacing:2px;opacity:.85}
+#card .word{font-weight:700;line-height:1.25;white-space:nowrap;text-align:center;color:#fff;
+ text-shadow:0 6px 0 rgba(0,0,0,.28),0 0 40px rgba(255,194,61,.45)}
+#card .who{position:absolute;bottom:calc(env(safe-area-inset-bottom) + 14px);left:0;right:0;text-align:center;font-size:18px;opacity:.9}
+#card .back{position:absolute;top:calc(env(safe-area-inset-top) + 8px);left:10px;font:inherit;font-size:15px;color:#fff;background:rgba(0,0,0,.28);
+ border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:6px 14px;opacity:0;transition:opacity .2s;pointer-events:none}
+#card.ui .back{opacity:1;pointer-events:auto}
+#card .tip{position:absolute;bottom:calc(env(safe-area-inset-bottom) + 46px);left:0;right:0;text-align:center;font-size:14px;opacity:0;transition:opacity .2s}
+#card.ui .tip{opacity:.75}
+</style>
+</head>
+<body>
+<div id="pick">
+  <h1>ชูมือถือ · เที่ยวบิน Red🔥</h1>
+  <p>แตะชื่อตัวเอง แล้วหันจอออก<br>14 คนเรียงกัน = ครบประโยค</p>
+  <div id="list"></div>
+  <div id="line"></div>
+</div>
+<div id="card">
+  <button class="back" id="back">‹ เปลี่ยนชื่อ</button>
+  <div class="top" id="top"></div>
+  <div class="word" id="word"></div>
+  <div class="tip">แตะจอ = ซ่อน/แสดงปุ่ม · หมุนแนวนอนตัวจะใหญ่ขึ้น</div>
+  <div class="who" id="who"></div>
+</div>
+<script>
+"use strict";
+// Same seat order, names, colours and motto words as index.html (A4_WORDS)
+const P=[
+["01","Captain โย","Red",["#ff4d4d","#ff9a3c"]],
+["02","แอ้","Red",["#c8102e","#ff5f6d"]],
+["03","เบส 🐷","ไฟลุก",["#ff7eb3","#ff3d6e"]],
+["04","Eh 59365","แรงฤทธิ์",["#ffb347","#ff6a00"]],
+["05","ice SuwatL","ชิตทุกใจ",["#4facfe","#00c6fb"]],
+["06","อุ๋งอิ๋ง","สิบสี่",["#a18cd1","#fbc2eb"]],
+["07","Maapandi","คน",["#8e2de2","#c471ed"]],
+["08","Matthew","บิน",["#43cea2","#185a9d"]],
+["09","nan","ไป",["#56ab2f","#a8e063"]],
+["10","อาร์ม 🐋","ด้วยกัน",["#2193b0","#6dd5ed"]],
+["11","ปาลวัฒน์","ไม่มี",["#232526","#606c88"]],
+["12","PATIPHAN T.","ใคร",["#06c755","#00a040"]],
+["13","สาม","ทิ้ง",["#7f00ff","#00d2ff"]],
+["14","ยอด","ใคร",["#0f2b5b","#2a5298"]]];
+const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;");
+const grad=c=>`linear-gradient(135deg,${c[0]},${c[1]})`;
+document.getElementById("list").innerHTML=P.map((p,i)=>`<button data-i="${i}" style="background:${grad(p[3])}">
+  <span class="seat">SEAT ${p[0]}</span><span class="nm">${esc(p[1])}</span><span class="wd">คำ: ${esc(p[2])}</span></button>`).join("");
+document.getElementById("line").textContent="Red Red ไฟลุก แรงฤทธิ์ชิตทุกใจ สิบสี่คน บินไปด้วยกัน ไม่มีใครทิ้งใคร";
+const card=document.getElementById("card"),word=document.getElementById("word");let cur=-1,lock=null;
+function fit(){if(cur<0)return;const W=innerWidth*0.92,H=innerHeight*0.62;let lo=20,hi=1200;
+  while(hi-lo>2){const m=(lo+hi)/2;word.style.fontSize=m+"px";(word.scrollWidth<=W&&word.scrollHeight<=H)?lo=m:hi=m;}
+  word.style.fontSize=lo+"px";}
+async function wake(){try{if("wakeLock" in navigator&&!lock){lock=await navigator.wakeLock.request("screen");lock.addEventListener("release",()=>lock=null);}}catch(e){}}
+function open(i){cur=i;const p=P[i];card.style.background=grad(p[3]);
+  document.getElementById("top").textContent=`SEAT ${p[0]} · RED🔥`;word.textContent=p[2];
+  document.getElementById("who").textContent=p[1];card.classList.add("show");card.classList.remove("ui");
+  document.getElementById("pick").style.display="none";history.replaceState(null,"","#"+p[0]);fit();wake();}
+function close(){cur=-1;card.classList.remove("show");document.getElementById("pick").style.display="";history.replaceState(null,"",location.pathname);}
+document.getElementById("list").addEventListener("click",e=>{const b=e.target.closest("button");if(b)open(+b.dataset.i);});
+card.addEventListener("click",e=>{if(e.target.id==="back"){close();return;}card.classList.toggle("ui");});
+addEventListener("resize",fit);addEventListener("orientationchange",()=>setTimeout(fit,250));
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&cur>=0)wake();});
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fit);
+const h=location.hash.slice(1),k=P.findIndex(p=>p[0]===h.padStart(2,"0"));if(h&&k>=0)open(k);
+</script>
+</body>
+</html>

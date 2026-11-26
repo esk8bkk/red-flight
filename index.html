@@ -290,11 +290,26 @@ input[type=file]{display:none}
   box-shadow:0 12px 40px rgba(0,0,0,.5),0 0 0 5px #FFC23D;cursor:pointer}
 #gate .hint{font-size:clamp(16px,3.6vw,22px);opacity:.92;text-align:center;max-width:22em}
 
+
+/* karaoke */
+#kara{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);z-index:26;max-width:1180px;text-align:center;pointer-events:none;
+ background:rgba(20,0,4,.68);border:2px solid rgba(255,194,61,.6);border-radius:22px;padding:4px 30px 7px;opacity:0;transition:opacity .35s}
+#kara.on{opacity:1}
+#kara .th{font-size:38px;font-weight:700;line-height:1.3;white-space:nowrap;color:rgba(255,255,255,.62);text-shadow:0 3px 0 rgba(0,0,0,.45)}
+#kara .ro{font-size:21px;font-weight:400;line-height:1.15;white-space:nowrap;color:rgba(255,255,255,.55);letter-spacing:.4px}
+#kara span{transition:color .15s}
+#kara .th span+span,#kara .ro span+span{margin-left:.32em}
+#kara .th span.sung{color:#FFC23D}
+#kara .ro span.sung{color:#FFE08A}
+#kara.next .th,#kara.next .ro{opacity:.75}
+body.kara-on .bbar,body.kara-on #themelbl,body.kara-on .endcard .nextq{opacity:0!important;pointer-events:none}
+body.karaoff #kara{display:none}
 </style>
 </head>
 <body>
 <div id="stage">
   <div id="track"></div>
+  <div id="kara"><div class="th"></div><div class="ro"></div></div>
   <div id="prog"><div class="rail"></div><div class="fill"></div><div id="dots"></div>
     <div id="plane"><svg viewBox="0 0 64 40"><path fill="#fff" stroke="#c10d22" stroke-width="2" d="M2 20c0-2 3-3 7-3h17L14 3h7l20 14h13c5 0 8 1.5 8 3s-3 3-8 3H41L21 37h-7l12-14H9c-4 0-7-1-7-3z"/><path fill="#FF7A00" d="M2 20l-1 0c0-1 0-1 1-2z"/></svg></div>
     <div id="seatlbl"></div></div>
@@ -363,7 +378,7 @@ function avInner(p){
 }
 function avStyle(p){return p.wings?"":`background:linear-gradient(135deg,${p.c[0]},${p.c[1]})`;}
 function bbar(i,photo){
-  return `<div class="bbar"><div class="hint">← → / แตะ · A โชว์ 2:00 · M เสียง · N โน้ต · F เต็มจอ · H ซ่อน</div><div class="btns">
+  return `<div class="bbar"><div class="hint">← → / แตะ · A โชว์ 2:00 · M เสียง · N โน้ต · F เต็มจอ · H ซ่อน · K คาราโอเกะ</div><div class="btns">
   ${photo?`<button class="btn" data-act="photo" data-i="${i}">📷 เพิ่มรูป</button>`:""}<button class="btn" data-act="audio" data-i="${i}">🎵 เพิ่มเพลง</button></div></div>`;
 }
 function embers(k){let s='<div class="embers">';for(let j=0;j<k;j++)s+=`<span class="e" style="left:${(j*97)%100}%;animation-delay:${(j*0.73)%6}s;font-size:${22+(j*7)%26}px">🔥</span>`;return s+"</div>";}
@@ -594,7 +609,8 @@ addEventListener("keydown",e=>{const k=e.key;if(e.target&&/^(TEXTAREA|INPUT)$/.t
   else if(k==="n"||k==="N"){document.getElementById("notes").classList.toggle("show");updNotes();}
   else if(k==="f"||k==="F")toggleFS();
   else if(k==="a"||k==="A"){showMode?stopShow():startShow();}
-  else if(k==="h"||k==="H")document.body.classList.toggle("hideui");});
+  else if(k==="k"||k==="K")toggleKara();
+   else if(k==="h"||k==="H")document.body.classList.toggle("hideui");});
 function toggleFS(){const d=document,el=d.documentElement;if(d.fullscreenElement||d.webkitFullscreenElement){(d.exitFullscreen||d.webkitExitFullscreen).call(d);}
   else{const r=el.requestFullscreen||el.webkitRequestFullscreen;if(r)try{const p=r.call(el);if(p&&p.catch)p.catch(()=>toast("เต็มจอไม่ได้ในเบราว์เซอร์นี้"))}catch(e){}else toast("อุปกรณ์นี้ไม่รองรับเต็มจอ — iPad: แชร์ ➜ เพิ่มไปยังหน้าจอโฮม");}}
 let pickFor=0;
@@ -655,6 +671,31 @@ loadTimings();
     if(e.key==="Enter"||e.key===" "){e.preventDefault();goStart(e);}
   });
 })();
+
+/* ---------- karaoke (Thai + romanized), timed to audio/theme.mp3 ---------- */
+const LYRICS=/*LYRICS*/[[0.0, 4.4, [["ติ๊งต่อง", "Ting-tong"], ["ผู้โดยสาร", "phu-doi-san"], ["โปรดทราบ", "prot sap"]]], [4.4, 8.2, [["เที่ยวบิน", "Thiao-bin"], ["Red", "Red"], ["พร้อม", "phrom"], ["ออกเดินทาง", "ok doen-thang"]]], [8.2, 12.5, [["กัปตันโย", "Kap-tan Yo"], ["ประกาศ", "pra-kat"], ["เสียงดัง", "siang dang"]]], [18.9, 22.7, [["ไม่มีดีเลย์", "Mai mi di-le"], ["มีแต่", "mi tae"], ["คนดีเลย", "khon di loei"]]], [22.7, 26.6, [["แนทบอกว่า", "Nat bok wa"], ["ไม่มีใคร", "mai mi khrai"], ["เดินคนเดียว", "doen khon diao"]]], [26.6, 30.5, [["บีที", "BT"], ["โทรตาม", "tho tam"], ["จนแบต", "chon baet"], ["หมดเลย", "mot loei"]]], [30.5, 34.0, [["เอ๊ะชี้ทาง", "Eh chi thang"], ["ชีวิตคือ", "chi-wit khue"], ["การเดินทาง", "kan doen-thang"]]], [34.0, 38.1, [["ไอซ์เย็นชา", "Ice yen-cha"], ["แค่ชื่อ", "khae chue"], ["ใจอุ่น", "chai un"], ["จริงจัง", "ching-chang"]]], [38.1, 43.2, [["Red Red", "Red Red"], ["ไฟลุก", "fai luk"], ["แรงฤทธิ์", "raeng rit"], ["ชิตทุกใจ", "chit thuk chai"]]], [43.2, 47.0, [["สิบสี่คน", "Sip-si khon"], ["บินไปด้วยกัน", "bin pai duai kan"], ["ไม่มีใคร", "mai mi khrai"], ["ทิ้งใคร", "thing khrai"]]], [47.0, 50.9, [["Red Red", "Red Red"], ["ไฟลุก", "fai luk"], ["หัวใจเรา", "hua-chai rao"], ["เป็นหนึ่งเดียว", "pen nueng diao"]]], [50.9, 53.6, [["Fasten seatbelt", "Fasten seatbelt"], ["เตรียมตัว", "triam tua"], ["สนุก", "sa-nuk"]]], [53.6, 56.4, [["ไปด้วยกัน", "Pai duai kan"], ["ทั้งลำ", "thang lam"]]], [56.4, 60.0, [["อิงอุ๋ง", "Ing-Ung"], ["ถามลงยัง", "tham long yang"]]], [60.0, 63.4, [["ยังไม่ทัน", "Yang mai than"], ["ได้ออกตัว", "dai ok tua"], ["Maapandi", "Maapandi"]]], [63.4, 66.4, [["ปั่นจักรยาน", "Pan chak-kra-yan"], ["Simple", "simple"], ["แต่ไม่ธรรมดา", "tae mai tham-ma-da"]]], [66.4, 69.9, [["แมทธิว", "Matthew"], ["น้ำตาซึม", "nam-ta suem"], ["ซึ้งที่ได้", "sueng thi dai"], ["บินด้วยกัน", "bin duai kan"]]], [69.9, 75.4, [["น่านพกต้นไม้มา", "Nan phok ton-mai ma"], ["NJ", "NJ"], ["วาฬตัวใหญ่", "wan tua yai"], ["ขอที่วางกระเป๋า", "kho thi wang kra-pao"]]], [75.4, 80.3, [["ภลวัต", "Phalawat"], ["เงียบเหมือนนินจา", "ngiap muean ninja"], ["ปฏิภาณ", "Patiphan"]]], [80.3, 82.3, [["ตอบไลน์ช้า", "Top LINE cha"], ["ขอโทษที", "kho-thot thi"]]], [82.3, 85.3, [["สามชี้ฟ้า", "Sam chi fa"], ["To infinity", "to infinity"]]], [85.3, 88.3, [["ยอดดูแล", "Yot du-lae"], ["ทั้งห้องโดยสาร", "thang hong doi-san"]]], [88.3, 92.3, [["ทุกคน", "Thuk khon"], ["ปลอดภัย", "plot-phai"], ["ถึงที่หมาย", "thueng thi mai"]]], [92.3, 96.6, [["Red Red", "Red Red"], ["ไฟลุก", "fai luk"], ["แรงฤทธิ์", "raeng rit"], ["ชิตทุกใจ", "chit thuk chai"]]], [97.4, 101.2, [["สิบสี่คน", "Sip-si khon"], ["บินไปด้วยกัน", "bin pai duai kan"], ["ไม่มีใคร", "mai mi khrai"], ["ทิ้งใคร", "thing khrai"]]], [101.2, 105.1, [["Red Red", "Red Red"], ["ไฟลุก", "fai luk"], ["หัวใจเรา", "hua-chai rao"], ["เป็นหนึ่งเดียว", "pen nueng diao"]]], [105.1, 107.8, [["Fasten seatbelt", "Fasten seatbelt"], ["เตรียมตัว", "triam tua"], ["สนุก", "sa-nuk"]]], [107.8, 110.6, [["ไปด้วยกัน", "Pai duai kan"], ["ทั้งลำ", "thang lam"]]], [110.2, 115.5, [["ขอบคุณที่บิน", "Khop-khun thi bin"], ["กับ Red", "kap Red"], ["ใครหลับอยู่", "khrai lap yu"], ["ตื่นได้แล้ว", "tuen dai laeo"]]]]/*END*/;
+const KKEY="redflight-karaoke-off";let karaIdx=-2,karaOn=false;
+try{if(localStorage.getItem(KKEY)==="1")document.body.classList.add("karaoff");}catch(e){}
+LYRICS.forEach(l=>{let tot=0;l[2].forEach(c=>tot+=c[0].length);let acc=0;l.at=l[2].map(c=>{const a=l[0]+(l[1]-l[0])*acc/tot;acc+=c[0].length;return a;});});
+function karaFit(){const k=document.getElementById("kara");[".th",".ro"].forEach((q,j)=>{const el=k.querySelector(q);let fs=j?21:38;el.style.fontSize=fs+"px";
+  while(el.scrollWidth>1120&&fs>(j?14:22)){fs-=1;el.style.fontSize=fs+"px";}});}
+function karaRender(i){const k=document.getElementById("kara");const l=LYRICS[i];
+  k.querySelector(".th").innerHTML=l[2].map(c=>`<span>${esc(c[0])}</span>`).join("");
+  k.querySelector(".ro").innerHTML=l[2].map(c=>`<span>${esc(c[1])}</span>`).join("");karaFit();}
+function karaTick(){const k=document.getElementById("kara");
+  const live=themeKind==="audio/theme.mp3"&&themeStarted&&!theme.paused&&!document.body.classList.contains("karaoff");
+  const t=theme.currentTime||0;let i=-1,next=false;
+  if(live){for(let j=0;j<LYRICS.length;j++){const l=LYRICS[j],nx=LYRICS[j+1];
+      if(t>=l[0]-0.05&&t<Math.min(nx?nx[0]:1e9,l[1]+1.2)){i=j;break;}
+      if(t<l[0]&&t>=l[0]-1.6){i=j;next=true;break;}}}
+  if(i!==karaIdx){karaIdx=i;if(i>=0)karaRender(i);}
+  const on=i>=0;if(on!==karaOn){karaOn=on;k.classList.toggle("on",on);document.body.classList.toggle("kara-on",on);}
+  k.classList.toggle("next",next);
+  if(on){const l=LYRICS[i];const th=k.querySelectorAll(".th span"),ro=k.querySelectorAll(".ro span");
+    l.at.forEach((a,j)=>{const s=!next&&t>=a;th[j].classList.toggle("sung",s);ro[j].classList.toggle("sung",s);});}
+  requestAnimationFrame(karaTick);}
+function toggleKara(){const off=document.body.classList.toggle("karaoff");try{localStorage.setItem(KKEY,off?"1":"0")}catch(e){}toast(off?"ซ่อนคาราโอเกะ (K = แสดง)":"แสดงคาราโอเกะ (K = ซ่อน)");}
+requestAnimationFrame(karaTick);
 
 /* ---------- init ---------- */
 (async function init(){
